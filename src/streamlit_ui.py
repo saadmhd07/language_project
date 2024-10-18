@@ -5,8 +5,8 @@ from bot import ChatBot
 bot = ChatBot()
 
 # Interface utilisateur Streamlit
-st.title("Chatbot avec Together.ai")
-st.write("Posez votre question ci-dessous :")
+st.title("Simulation de discussion à l'Universidad de Chile")
+st.write("Vous venez d'arriver à l'Université de Chile. Interpellez un étudiant chilien et commencez une conversation.")
 
 # Champ de saisie pour l'utilisateur
 user_input = st.text_input("Votre question :")
@@ -25,11 +25,10 @@ if st.button("Envoyer"):
         st.session_state["conversation"].append({"role": "user", "content": user_input})
         st.session_state["conversation"].append({"role": "assistant", "content": bot_response})
 
-# Afficher l'historique des conversations
-if st.session_state["conversation"]:
-    st.write("**Historique de la conversation :**")
-    for message in st.session_state["conversation"]:
-        if message["role"] == "user":
-            st.write(f"**Vous**: {message['content']}")
-        elif message["role"] == "assistant":
-            st.write(f"**Bot**: {message['content']}")
+# Afficher l'historique des conversations avec couleurs et smileys
+st.write("**Historique de la conversation :**")
+for message in st.session_state["conversation"]:
+    if message["role"] == "user":
+        st.markdown(f'<div style="text-align: left; color: blue;"><strong>😃 Vous:</strong> {message["content"]}</div>', unsafe_allow_html=True)
+    elif message["role"] == "assistant":
+        st.markdown(f'<div style="text-align: right; color: green;"><strong>🤖 Bot:</strong> {message["content"]}</div>', unsafe_allow_html=True)
