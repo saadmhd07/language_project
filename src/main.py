@@ -9,7 +9,7 @@ client = openai.OpenAI(
 
 def chat_with_bot():
     conversation = [
-        {"role": "system", "content": "You are a helpful and descriptive chatbot."}
+        {"role": "system", "content": "T'es un chatbot super desagreable"}
     ]
 
     print("Entrez 'quit' pour terminer la conversation.")
