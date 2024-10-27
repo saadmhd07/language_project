@@ -1,9 +1,14 @@
 import os
+import json
 from langchain_together import ChatTogether
-from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import SQLChatMessageHistory
+
+# Charger les prompts à partir du fichier JSON
+def load_prompts(file_path="data/prompts.json"):
+    with open(file_path, "r") as file:
+        return json.load(file)
 
 # Initialize the Together AI model
 llm = ChatTogether(
@@ -13,45 +18,57 @@ llm = ChatTogether(
     max_tokens=200
 )
 
-# Define the prompt template
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a friendly and helpful student at the Universidad de Chile. Your name is Sofía. You help new students get familiar with the campus and engage in friendly conversation. Speak in a casual, friendly Spanish. Have a natural conversation, your sentences shouldn't be too long."),
-    MessagesPlaceholder(variable_name="chat_history"),
-    ("human", "{input}")
-])
-
-# Define the "professor" prompt for correcting mistakes
-professor_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a spanish language teacher. Read the following student input. if there is any error, explain it briefly. Be concise."),
-    ("human", "{input}")
-])
-
-# Use SQL-based chat message history to store messages in a database file
+# Utiliser SQL pour l'historique des conversations
 def get_chat_history(session_id):
     return SQLChatMessageHistory(
         session_id=session_id, connection_string="sqlite:///conversation_history.db"
     )
 
-# Combine prompt and model into a chain
-chain = prompt | llm
-professor_chain = professor_prompt | llm
+# Charger les prompts
+prompts = load_prompts()
 
-# Use `RunnableWithMessageHistory` to automatically manage message history
-chain_with_message_history = RunnableWithMessageHistory(
-    chain,
-    get_chat_history,
-    input_messages_key="input",
-    history_messages_key="chat_history"
-)
-
-# Define a class to interface with the chatbot
+# Classe pour le ChatBot
 class ChatBot:
+    def __init__(self, scenario, learning_language="fr"):
+        self.scenario = scenario
+        self.learning_language = learning_language
+        self.bot_prompt = prompts[scenario]["bot_prompt"][learning_language]
+        self.professor_prompt = prompts[scenario]["professor_prompt"][learning_language]
+
+        # Créer les templates de prompt
+        bot_template = ChatPromptTemplate.from_messages([
+            ("system", self.bot_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}")
+        ])
+
+        professor_template = ChatPromptTemplate.from_messages([
+            ("system", self.professor_prompt),
+            ("human", "{input}")
+        ])
+
+        # Créer les chaînes
+        self.chain = bot_template | llm
+        self.professor_chain = professor_template | llm
+
+        # Configurer l'historique des messages pour la chaîne
+        self.chain_with_message_history = RunnableWithMessageHistory(
+            self.chain,
+            get_chat_history,
+            input_messages_key="input",
+            history_messages_key="chat_history"
+        )
+
     def get_response(self, user_message, session_id="default_session"):
         config = {"configurable": {"session_id": session_id}}
-        response = chain_with_message_history.invoke({"input": user_message}, config=config)
+        response = self.chain_with_message_history.invoke({"input": user_message}, config=config)
         return response.content
 
     def correct_errors(self, user_message):
-        # Directly use the professor chain to correct the input
-        response = professor_chain.invoke({"input": user_message})
+        # Utiliser le professeur pour corriger
+        response = self.professor_chain.invoke({"input": user_message})
         return response.content
+
+    @staticmethod
+    def get_available_scenarios():
+        return list(prompts.keys())
