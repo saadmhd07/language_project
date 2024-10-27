@@ -68,6 +68,10 @@ class ChatBot:
         # Utiliser le professeur pour corriger
         response = self.professor_chain.invoke({"input": user_message})
         return response.content
+    
+    def generate_prompt(self, user_message):
+    # Create the full prompt using the user message
+        return f"{self.bot_prompt}\nUser: {user_message}"
 
     @staticmethod
     def get_available_scenarios():
