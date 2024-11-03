@@ -13,7 +13,8 @@ AUDIO_FOLDER = "audio_conversations"
 os.makedirs(AUDIO_FOLDER, exist_ok=True)  # Ensure the folder exists
 
 # Load the Whisper model
-model = whisper.load_model("base")  # Make sure this works after proper installation
+model = whisper.load_model("base")
+
 
 def convert_audio_to_text_whisper(audio_path, language="en"):
     # Use Whisper to transcribe the audio and specify the language
