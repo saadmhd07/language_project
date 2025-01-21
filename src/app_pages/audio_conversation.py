@@ -13,7 +13,7 @@ AUDIO_FOLDER = "audio_conversations"
 os.makedirs(AUDIO_FOLDER, exist_ok=True)  # Ensure the folder exists
 
 # Load the Whisper model
-model = whisper.load_model("base")
+model = whisper.load_model("small")
 
 
 def convert_audio_to_text_whisper(audio_path, language="en"):

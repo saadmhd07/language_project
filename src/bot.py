@@ -1,5 +1,6 @@
 import os
 import json
+from dotenv import load_dotenv
 from langchain_together import ChatTogether
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
@@ -10,10 +11,17 @@ def load_prompts(file_path="data/prompts.json"):
     with open(file_path, "r") as file:
         return json.load(file)
 
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
+
+# Récupérer les clés API
+together_api_key = os.getenv("TOGETHER_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 # Initialize the Together AI model
 llm = ChatTogether(
     model="meta-llama/Llama-3-8b-chat-hf",
-    api_key=os.getenv("TOGETHER_API_KEY"),
+    api_key=together_api_key,
     temperature=0.7,
     max_tokens=200
 )
