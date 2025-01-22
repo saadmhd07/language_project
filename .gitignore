@@ -1,4 +1,45 @@
+# Audio et médias
 /audio_conversations/*
 /audio/*
+
+# Environnements virtuels et dépendances
+.venv/
+venv/
+poetry.lock
+
+# Fichiers Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bases de données
 conversation_history.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Streamlit files
+.streamlit/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.iml
+
+# Multimédia
+*.mp3
+*.wav
+*.mp4
+*.jpg
+*.png
+*.gif
+
+# Configuration sensible
 .env
